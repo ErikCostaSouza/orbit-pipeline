@@ -1,12 +1,48 @@
-Este projeto, GeoDataFlow, é uma plataforma de engenharia de dados (Downstream) projetada para processar dados de Observação da Terra (EO) em escala. Ele resolve o desafio de transformar terabytes de imagens brutas de satélite em informações prontas para consumo por modelos de Machine Learning e BI.
+🛰️ GeoDataFlow: Detecção de Mudanças e Vigilância ESG
+O GeoDataFlow é uma pipeline de engenharia de dados (Downstream) projetada para o monitoramento automatizado de áreas protegidas. O projeto utiliza dados de observação da Terra para identificar mudanças na cobertura do solo, como desmatamento ou construções ilegais, através de análise temporal.
 
-A arquitetura segue o padrão de Data Lakehouse e foca em três pilares principais:
+🎯 O Problema
+Órgãos de fiscalização e empresas com metas ESG enfrentam o desafio de monitorar áreas massivas em intervalos curtos. O processamento manual de imagens de satélite é lento, caro e difícil de escalar.
 
-Ingestão Padronizada: Uso de catálogos STAC para busca eficiente de ativos espaciais sem necessidade de download massivo.
+Esta pipeline automatiza a detecção de anomalias, transformando "pixels brutos" em "alertas de infração".
 
-Processamento Distribuído (Batch): Pipeline que automatiza o cálculo de índices biofísicos (ex: NDVI) e normalização de dados multiespectrais.
+⚙️ Arquitetura da Solução
+A pipeline foi construída seguindo os princípios de um Data Lakehouse Espacial:
 
-Armazenamento de Alta Performance: Implementação do padrão COG (Cloud Optimized GeoTIFF), permitindo que os dados sejam lidos de forma parcial e eficiente via nuvem.
+Ingestion (Bronze): Busca automatizada de imagens multiespectrais do satélite Sentinel-2 via API STAC (Microsoft Planetary Computer).
 
-🎯 Objetivo
-Demonstrar uma infraestrutura de dados moderna capaz de servir como base para monitoramento ambiental, análise de safras agrícolas e inteligência de mercado.
+Processing (Silver): * Cálculo de índices de vegetação (NDVI) para diferentes janelas temporais.
+
+Aplicação de algoritmos de Change Detection para isolar variações na biomassa.
+
+Filtragem de ruído (nuvens e variações sazonais).
+
+Serving (Gold): Geração de máscaras de mudança em formato COG (Cloud Optimized GeoTIFF) e relatórios JSON com as coordenadas e área (hectares) da alteração detectada.
+
+🛠️ Stack Tecnológica
+Orquestração: [Defina aqui, ex: Prefect ou Airflow]
+
+Linguagem: Python 3.10+
+
+Bibliotecas de EO: pystac-client, rasterio, stackstac, geopandas
+
+Processamento: NumPy e Xarray
+
+Armazenamento: Local / S3 (Parquet e COG)
+
+📊 Exemplo de Output
+Ao comparar duas datas (T1 e T2), a pipeline gera uma camada de evidência:
+
+Input: Duas imagens brutas de 500MB.
+
+Output: Um arquivo JSON de 2KB contendo a prova da mudança:
+
+JSON
+
+{
+  "alerta_id": "ESG-2024-001",
+  "coordenadas": [-54.32, -12.45],
+  "area_degradada_ha": 15.4,
+  "confianca": 0.92,
+  "timestamp": "2024-10-27T..."
+}
